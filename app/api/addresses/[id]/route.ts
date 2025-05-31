@@ -13,8 +13,8 @@ type Props = {
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: Props
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const { db } = await connectToDatabase()

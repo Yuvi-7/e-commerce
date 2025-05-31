@@ -1,17 +1,16 @@
 import { connectToDatabase } from "@/lib/mongodb"
-import { NextRequest, NextResponse } from "next/server"
-import { ObjectId, Collection } from "mongodb"
+import { type NextRequest, NextResponse } from "next/server"
+import { ObjectId } from "mongodb"
 import { cookies } from "next/headers"
 import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { db } = await connectToDatabase()
+    
+    // Get token from cookies
     const cookieStore = await cookies()
     const token = cookieStore.get("auth-token")?.value
 
@@ -19,6 +18,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Verify token and get user ID
     let decoded
     try {
       decoded = verify(token, JWT_SECRET) as { id: string }
@@ -30,8 +30,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Database not available" }, { status: 503 })
     }
 
-    const addressesCollection = db.collection("addresses") as Collection
-    const result = await addressesCollection.deleteOne({
+    const result = await db.collection("addresses").deleteOne({
       _id: new ObjectId(params.id),
       userId: decoded.id,
     })
@@ -47,12 +46,11 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { db } = await connectToDatabase()
+    
+    // Get token from cookies
     const cookieStore = await cookies()
     const token = cookieStore.get("auth-token")?.value
 
@@ -60,6 +58,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Verify token and get user ID
     let decoded
     try {
       decoded = verify(token, JWT_SECRET) as { id: string }
@@ -73,15 +72,15 @@ export async function PATCH(
       return NextResponse.json({ error: "Database not available" }, { status: 503 })
     }
 
-    const addressesCollection = db.collection("addresses") as Collection
+    // If setting as default, unset default for all other addresses first
     if (updates.isDefault) {
-      await addressesCollection.updateMany(
+      await db.collection("addresses").updateMany(
         { userId: decoded.id },
         { $set: { isDefault: false } }
       )
     }
 
-    const result = await addressesCollection.updateOne(
+    const result = await db.collection("addresses").updateOne(
       { _id: new ObjectId(params.id), userId: decoded.id },
       { $set: updates }
     )

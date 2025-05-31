@@ -1,14 +1,20 @@
 import { connectToDatabase } from "@/lib/mongodb"
-import { type NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
 import { cookies } from "next/headers"
 import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
+type Props = {
+  params: {
+    id: string
+  }
+}
+
 export async function DELETE(
-  request: NextRequest,
-  context: { params: { id: string } }
+  req: NextRequest,
+  { params }: Props
 ) {
   try {
     const { db } = await connectToDatabase()
@@ -33,7 +39,7 @@ export async function DELETE(
     }
 
     const result = await db.collection("addresses").deleteOne({
-      _id: new ObjectId(context.params.id),
+      _id: new ObjectId(params.id),
       userId: decoded.id,
     })
 

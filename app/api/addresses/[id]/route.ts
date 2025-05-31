@@ -6,7 +6,10 @@ import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     const { db } = await connectToDatabase()
     
@@ -31,7 +34,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     const result = await db.collection("addresses").deleteOne({
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(context.params.id),
       userId: decoded.id,
     })
 
@@ -46,7 +49,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     const { db } = await connectToDatabase()
     
@@ -81,7 +87,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 
     const result = await db.collection("addresses").updateOne(
-      { _id: new ObjectId(params.id), userId: decoded.id },
+      { _id: new ObjectId(context.params.id), userId: decoded.id },
       { $set: updates }
     )
 

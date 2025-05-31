@@ -6,27 +6,21 @@ import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
-type Props = {
-  params: {
-    id: string
-  }
-}
-
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
+  const { params } = context;
+
   try {
     const { db } = await connectToDatabase()
-    
-    // Get token from cookies
+
     const token = cookies().get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verify token and get user ID
     let decoded
     try {
       decoded = verify(token, JWT_SECRET) as { id: string }
@@ -54,18 +48,21 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
+  const { params } = context;
+
   try {
     const { db } = await connectToDatabase()
-    
-    // Get token from cookies
+
     const token = cookies().get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verify token and get user ID
     let decoded
     try {
       decoded = verify(token, JWT_SECRET) as { id: string }
@@ -79,7 +76,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: "Database not available" }, { status: 503 })
     }
 
-    // If setting as default, unset default for all other addresses first
     if (updates.isDefault) {
       await db.collection("addresses").updateMany(
         { userId: decoded.id },
@@ -101,4 +97,4 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     console.error("Failed to update address:", error)
     return NextResponse.json({ error: "Failed to update address" }, { status: 500 })
   }
-} 
+}

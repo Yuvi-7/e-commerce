@@ -1,44 +1,52 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Eye } from "lucide-react"
+import { Eye, Trash2 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export function OrderHistory() {
-  // Dummy order data
-  const [orders] = useState([
-    {
-      id: "ORD-12345",
-      date: "May 10, 2025",
-      status: "Delivered",
-      total: "$125.99",
-      items: 3,
-    },
-    {
-      id: "ORD-12344",
-      date: "April 28, 2025",
-      status: "Shipped",
-      total: "$89.50",
-      items: 2,
-    },
-    {
-      id: "ORD-12343",
-      date: "April 15, 2025",
-      status: "Delivered",
-      total: "$254.75",
-      items: 4,
-    },
-    {
-      id: "ORD-12342",
-      date: "March 22, 2025",
-      status: "Delivered",
-      total: "$45.25",
-      items: 1,
-    },
-  ])
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch("/api/orders")
+      const data = await response.json()
+      setOrders(data)
+    } catch (error) {
+      console.error("Failed to fetch orders:", error)
+      toast.error("Failed to load orders")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete order")
+      }
+
+      // Remove the order from the UI
+      setOrders(orders.filter((order) => order.id !== orderId))
+      toast.success("Order deleted successfully")
+    } catch (error) {
+      console.error("Failed to delete order:", error)
+      toast.error("Failed to delete order")
+    }
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -57,13 +65,23 @@ export function OrderHistory() {
     }
   }
 
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <p>Loading orders...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (orders.length === 0) {
     return (
       <Card>
         <CardContent className="p-6 text-center">
           <p className="mb-4">You haven't placed any orders yet.</p>
           <Button asChild>
-            <Link href="/products">Start Shopping</Link>
+            <Link href="/products">Continue Shopping</Link>
           </Button>
         </CardContent>
       </Card>
@@ -73,10 +91,10 @@ export function OrderHistory() {
   return (
     <div className="space-y-6">
       {orders.map((order) => (
-        <Card key={order.id}>
+        <Card key={order.id || order._id}>
           <CardHeader className="pb-3">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <CardTitle className="text-lg">Order {order.id}</CardTitle>
+              <CardTitle className="text-lg">Order {order.id || order._id}</CardTitle>
               <div className="flex items-center gap-2 mt-2 md:mt-0">
                 <Badge variant="outline" className={getStatusColor(order.status)}>
                   {order.status}
@@ -88,15 +106,18 @@ export function OrderHistory() {
           <CardContent>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">{order.items} items</p>
+                <p className="text-sm text-muted-foreground mb-1">{order.items?.length || 0} items</p>
                 <p className="font-medium">{order.total}</p>
               </div>
-              <div className="mt-4 md:mt-0">
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/account/orders/${order.id}`}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Order
-                  </Link>
+              <div className="mt-4 md:mt-0 flex gap-2">
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleDeleteOrder(order.id || order._id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
                 </Button>
               </div>
             </div>

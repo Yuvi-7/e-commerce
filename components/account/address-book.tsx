@@ -1,68 +1,86 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Edit, Plus, Trash2 } from "lucide-react"
+import { Edit, Plus, Trash2, Package } from "lucide-react"
 import { toast } from "sonner"
+import { AddressFormDialog } from "./address-form-dialog"
+import Link from "next/link"
 
 export function AddressBook() {
-  // Dummy address data
-  const [addresses, setAddresses] = useState([
-    {
-      id: "1",
-      name: "John Doe",
-      line1: "123 Main Street",
-      line2: "Apt 4B",
-      city: "San Francisco",
-      state: "CA",
-      postalCode: "94103",
-      country: "United States",
-      phone: "(555) 123-4567",
-      isDefault: true,
-    },
-    {
-      id: "2",
-      name: "John Doe",
-      line1: "456 Market Street",
-      line2: "",
-      city: "San Francisco",
-      state: "CA",
-      postalCode: "94105",
-      country: "United States",
-      phone: "(555) 987-6543",
-      isDefault: false,
-    },
-  ])
+  const [addresses, setAddresses] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const handleDelete = (id) => {
-    setAddresses(addresses.filter((address) => address.id !== id))
-    toast.success("Address deleted successfully")
+  useEffect(() => {
+    fetchAddresses()
+  }, [])
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await fetch("/api/addresses")
+      if (!response.ok) throw new Error("Failed to fetch addresses")
+      const data = await response.json()
+      setAddresses(data)
+    } catch (error) {
+      console.error("Error fetching addresses:", error)
+      toast.error("Failed to load addresses")
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleSetDefault = (id) => {
-    setAddresses(
-      addresses.map((address) => ({
-        ...address,
-        isDefault: address.id === id,
-      })),
-    )
-    toast.success("Default address updated")
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`/api/addresses/${id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) throw new Error("Failed to delete address")
+      setAddresses(addresses.filter((address) => address._id !== id))
+      toast.success("Address deleted successfully")
+    } catch (error) {
+      console.error("Error deleting address:", error)
+      toast.error("Failed to delete address")
+    }
+  }
+
+  const handleSetDefault = async (id) => {
+    try {
+      const response = await fetch(`/api/addresses/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isDefault: true }),
+      })
+      if (!response.ok) throw new Error("Failed to update address")
+      setAddresses(
+        addresses.map((address) => ({
+          ...address,
+          isDefault: address._id === id,
+        })),
+      )
+      toast.success("Default address updated")
+    } catch (error) {
+      console.error("Error updating address:", error)
+      toast.error("Failed to update default address")
+    }
+  }
+
+  if (loading) {
+    return <div>Loading addresses...</div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Your Addresses</h2>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Address
-        </Button>
+        <AddressFormDialog onAddressAdded={fetchAddresses} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {addresses.map((address) => (
-          <Card key={address.id}>
+          <Card key={address._id}>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
                 {address.name}
@@ -86,17 +104,20 @@ export function AddressBook() {
             </CardContent>
             <CardFooter className="flex justify-between">
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleDelete(address.id)}>
+                */}
+                <Button variant="outline" size="sm" onClick={() => handleDelete(address._id)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/account/orders">
+                    <Package className="mr-2 h-4 w-4" />
+                    View Orders
+                  </Link>
+                </Button>
               </div>
               {!address.isDefault && (
-                <Button variant="ghost" size="sm" onClick={() => handleSetDefault(address.id)}>
+                <Button variant="ghost" size="sm" onClick={() => handleSetDefault(address._id)}>
                   Set as Default
                 </Button>
               )}
@@ -104,6 +125,12 @@ export function AddressBook() {
           </Card>
         ))}
       </div>
+
+      {addresses.length === 0 && (
+        <div className="text-center py-6">
+          <p className="text-muted-foreground">You haven't added any addresses yet.</p>
+        </div>
+      )}
     </div>
   )
 }

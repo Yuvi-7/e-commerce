@@ -1,35 +1,93 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
+import { useAuth } from "@/hooks/use-auth"
 
 export function ProfileForm() {
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "(555) 123-4567",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isFetching, setIsFetching] = useState(true)
+
+  useEffect(() => {
+    fetchUserProfile()
+  }, [])
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch("/api/users/profile")
+      if (!response.ok) throw new Error("Failed to fetch profile")
+      const data = await response.json()
+      
+      // Split name into first and last name
+      const [firstName = "", lastName = ""] = (data.name || "").split(" ")
+      
+      setFormData({
+        firstName,
+        lastName,
+        email: data.email || "",
+        phone: data.phone || "",
+      })
+    } catch (error) {
+      console.error("Error fetching profile:", error)
+      toast.error("Failed to load profile")
+    } finally {
+      setIsFetching(false)
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsSubmitting(true)
+    setIsLoading(true)
 
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/users/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email,
+          phone: formData.phone,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Failed to update profile")
+      
       toast.success("Profile updated successfully!")
-      setIsSubmitting(false)
-    }, 1000)
+    } catch (error) {
+      console.error("Error updating profile:", error)
+      toast.error("Failed to update profile")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (isFetching) {
+    return (
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle>Profile Information</CardTitle>
+          <CardDescription>Loading your profile information...</CardDescription>
+        </CardHeader>
+      </Card>
+    )
   }
 
   return (
@@ -60,8 +118,8 @@ export function ProfileForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save Changes"}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </CardFooter>
       </form>

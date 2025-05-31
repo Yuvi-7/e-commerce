@@ -20,8 +20,8 @@ export function OrdersTable() {
   const [orders] = useState([
     {
       id: "ORD-001",
-      customer: "John Doe",
-      email: "john.doe@example.com",
+      customer: "Alice Johnson",
+      email: "alice.johnson@example.com",
       date: "2023-06-15",
       status: "Delivered",
       total: "$125.99",

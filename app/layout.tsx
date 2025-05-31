@@ -10,7 +10,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "NextShop - E-Commerce Store",
+  title: "eShop - E-Commerce Store",
   description: "A modern e-commerce store built with Next.js",
   generator: "v0.dev",
 };

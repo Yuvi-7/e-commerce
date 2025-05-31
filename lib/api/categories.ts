@@ -11,16 +11,24 @@ export async function getCategories() {
       return getDummyCategories();
     }
 
-    // Query MongoDB
+    // Get all categories
     const categories = await db.collection("categories").find({}).toArray();
 
-    // Convert ObjectId to string for serialization
-    const sanitized = categories.map((cat) => ({
-      ...cat,
-      _id: cat._id.toString(),
-    }));
+    // Get product counts for each category
+    const categoryCounts = await Promise.all(
+      categories.map(async (category) => {
+        const count = await db.collection("products").countDocuments({
+          categoryId: category.id.toString(),
+        });
+        return {
+          ...category,
+          _id: category._id.toString(),
+          count, // Add real product count
+        };
+      })
+    );
 
-    return sanitized;
+    return categoryCounts;
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     // Fall back to dummy data on error
@@ -43,17 +51,35 @@ export async function getCategoryByIdFromDb(id: string) {
       // Try to create ObjectId from string
       const objectId = new ObjectId(id);
       category = await db.collection("categories").findOne({ _id: objectId });
+
+      if (category) {
+        // Get real product count for this category
+        const count = await db.collection("products").countDocuments({
+          categoryId: category.id.toString(),
+        });
+
+        return {
+          ...category,
+          _id: category._id.toString(),
+          count, // Add real product count
+        };
+      }
     } catch (error) {
       // Fallback to string ID search
       category = await db.collection("categories").findOne({ id });
-    }
+      
+      if (category) {
+        // Get real product count for this category
+        const count = await db.collection("products").countDocuments({
+          categoryId: category.id.toString(),
+        });
 
-    if (category) {
-      // Convert _id to string
-      return {
-        ...category,
-        _id: category._id.toString(),
-      };
+        return {
+          ...category,
+          _id: category._id.toString(),
+          count, // Add real product count
+        };
+      }
     }
 
     // If not found, return dummy data

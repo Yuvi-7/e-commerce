@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, Menu, X, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,79 +19,93 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Constants
+const SEARCH_DEBOUNCE_MS = 300;
+const MOBILE_BREAKPOINT = 768; // md breakpoint
+
+
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
   const pathname = usePathname();
   const { totalItems = 0 } = useCart();
   const { user, logout } = useAuth();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isAdminRoute = pathname?.startsWith("/admin");
+  const handleSearchToggle = useCallback(() => {
+    setIsSearchOpen(prev => !prev);
+  }, []);
 
-  if (isAdminRoute) return null;
+  const handleLogout = useCallback(() => {
+    logout();
+  }, [logout]);
+
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-            <nav className="flex flex-col gap-4 mt-8">
-              <Link href="/" className="text-lg font-medium">
-                Home
-              </Link>
-              <Link href="/products" className="text-lg font-medium">
-                Products
-              </Link>
-              <Link href="/categories" className="text-lg font-medium">
-                Categories
-              </Link>
-              <Link href="/about" className="text-lg font-medium">
-                About
-              </Link>
-              <Link href="/contact" className="text-lg font-medium">
-                Contact
-              </Link>
-              {user ? (
-                <>
-                  <Link href="/account" className="text-lg font-medium">
-                    My Account
-                  </Link>
-                  <button
-                    onClick={() => logout()}
-                    className="text-lg font-medium text-left"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" className="text-lg font-medium">
-                    Login
-                  </Link>
-                  <Link href="/register" className="text-lg font-medium">
-                    Register
-                  </Link>
-                </>
-              )}
-            </nav>
-          </SheetContent>
-        </Sheet>
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+              <nav className="flex flex-col gap-6 mt-8">
+                <Link href="/" className="text-lg font-medium">
+                  Home
+                </Link>
+                <Link href="/products" className="text-lg font-medium">
+                  Products
+                </Link>
+                <Link href="/categories" className="text-lg font-medium">
+                  Categories
+                </Link>
+                <Link href="/about" className="text-lg font-medium">
+                  About
+                </Link>
+                <Link href="/contact" className="text-lg font-medium">
+                  Contact
+                </Link>
+                {user ? (
+                  <>
+                    <Link href="/account" className="text-lg font-medium">
+                      My Account
+                    </Link>
+                    <button
+                      onClick={() => logout()}
+                      className="text-lg font-medium text-left"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" className="text-lg font-medium">
+                      Login
+                    </Link>
+                    <Link href="/register" className="text-lg font-medium">
+                      Register
+                    </Link>
+                  </>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
 
-        <Link href="/" className="ml-4 md:ml-0 flex items-center gap-2">
-          <span className="font-bold text-xl">NextShop</span>
-        </Link>
+          <Link href="/" className="ml-4 md:ml-0 flex items-center gap-2">
+            <span className="font-bold text-xl">eShop</span>
+          </Link>
+        </div>
 
-        <nav className="mx-6 hidden md:flex items-center gap-6 text-sm">
+        <nav className="mx-8 hidden md:flex items-center gap-8 text-sm">
           <Link
             href="/"
             className="font-medium transition-colors hover:text-foreground/80"
@@ -124,7 +138,7 @@ export function Header() {
           </Link>
         </nav>
 
-        <div className="flex flex-1 items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-4">
           {isSearchOpen ? (
             <div className="relative w-full max-w-sm">
               <Input

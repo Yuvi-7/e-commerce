@@ -42,7 +42,7 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Your name" required />
+        <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Rajesh Kumar" required />
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
@@ -52,7 +52,7 @@ export function ContactForm() {
           type="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="Your email address"
+          placeholder="rajesh.kumar@gmail.com"
           required
         />
       </div>
@@ -63,7 +63,7 @@ export function ContactForm() {
           name="subject"
           value={formData.subject}
           onChange={handleChange}
-          placeholder="Subject of your message"
+          placeholder="Product Inquiry"
           required
         />
       </div>

@@ -17,7 +17,7 @@ export function CheckoutForm() {
   const [paymentMethod, setPaymentMethod] = useState("card")
   const [shippingMethod, setShippingMethod] = useState("standard")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { clearCart } = useCart()
+  const { items, clearCart, subtotal, shipping, tax, total } = useCart()
   const router = useRouter()
 
   const [formData, setFormData] = useState({
@@ -40,36 +40,95 @@ export function CheckoutForm() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Validate form
-    if (
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.address ||
-      !formData.city ||
-      !formData.state ||
-      !formData.zip
-    ) {
-      toast.error("Please fill in all required shipping fields")
-      setIsSubmitting(false)
-      return
-    }
+    try {
+      // Validate form
+      if (
+        !formData.firstName ||
+        !formData.lastName ||
+        !formData.email ||
+        !formData.address ||
+        !formData.city ||
+        !formData.state ||
+        !formData.zip
+      ) {
+        toast.error("Please fill in all required shipping fields")
+        setIsSubmitting(false)
+        return
+      }
 
-    if (paymentMethod === "card" && (!formData.cardName || !formData.cardNumber || !formData.expiry || !formData.cvc)) {
-      toast.error("Please fill in all required payment fields")
-      setIsSubmitting(false)
-      return
-    }
+      if (paymentMethod === "card" && (!formData.cardName || !formData.cardNumber || !formData.expiry || !formData.cvc)) {
+        toast.error("Please fill in all required payment fields")
+        setIsSubmitting(false)
+        return
+      }
 
-    // Simulate order processing
-    setTimeout(() => {
+      // Create order object
+      const order = {
+        customer: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip: formData.zip,
+        },
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          size: item.size,
+          color: item.color,
+        })),
+        payment: {
+          method: paymentMethod,
+          ...(paymentMethod === "card" && {
+            cardName: formData.cardName,
+            cardNumber: formData.cardNumber.replace(/\d(?=\d{4})/g, "*"), // Mask card number
+            expiry: formData.expiry,
+          }),
+        },
+        shipping: {
+          method: shippingMethod,
+          cost: shippingMethod === "express" ? 25.00 : 10.00,
+        },
+        status: "Pending",
+        subtotal,
+        shipping,
+        tax,
+        total,
+        date: new Date().toISOString(),
+      }
+
+      // Save order to database
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(order),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to create order")
+      }
+
+      const { id } = await response.json()
+
+      // Clear cart and redirect to thank you page
       clearCart()
-      router.push("/thank-you")
-    }, 1500)
+      router.push(`/thank-you?orderId=${id}`)
+    } catch (error) {
+      console.error("Failed to process order:", error)
+      toast.error("Failed to process order. Please try again.")
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -88,7 +147,7 @@ export function CheckoutForm() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
-                  placeholder="Enter your first name"
+                  placeholder="Rajesh"
                   required
                 />
               </div>
@@ -99,7 +158,7 @@ export function CheckoutForm() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  placeholder="Enter your last name"
+                  placeholder="Kumar"
                   required
                 />
               </div>
@@ -112,7 +171,7 @@ export function CheckoutForm() {
                 value={formData.email}
                 onChange={handleChange}
                 type="email"
-                placeholder="Enter your email"
+                placeholder="rajesh.kumar@gmail.com"
                 required
               />
             </div>
@@ -123,7 +182,7 @@ export function CheckoutForm() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="Enter your phone number"
+                placeholder="+91 98765 43210"
               />
             </div>
             <div className="space-y-2">
@@ -133,7 +192,7 @@ export function CheckoutForm() {
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Enter your address"
+                placeholder="42/A, Senapati Marg, Ground Floor"
                 required
               />
             </div>
@@ -145,7 +204,7 @@ export function CheckoutForm() {
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  placeholder="Enter your city"
+                  placeholder="New Delhi"
                   required
                 />
               </div>
@@ -156,18 +215,18 @@ export function CheckoutForm() {
                   name="state"
                   value={formData.state}
                   onChange={handleChange}
-                  placeholder="Enter your state"
+                  placeholder="Delhi"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="zip">ZIP Code *</Label>
+                <Label htmlFor="zip">PIN Code *</Label>
                 <Input
                   id="zip"
                   name="zip"
                   value={formData.zip}
                   onChange={handleChange}
-                  placeholder="Enter your ZIP code"
+                  placeholder="110030"
                   required
                 />
               </div>
@@ -253,7 +312,7 @@ export function CheckoutForm() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Account Name:</span>
-                    <span className="text-sm">NextShop Inc.</span>
+                    <span className="text-sm">eShop Inc.</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Account Number:</span>

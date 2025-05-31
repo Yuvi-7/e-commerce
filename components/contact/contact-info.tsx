@@ -11,13 +11,13 @@ export function ContactInfo() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Our Location</h3>
               <p className="text-muted-foreground">
-                123 Commerce Street
+                42/A, Senapati Marg,
                 <br />
-                Suite 456
+                Ground Floor, 42/A,
                 <br />
-                San Francisco, CA 94103
+                Saket, New Delhi - 110030
                 <br />
-                United States
+                India
               </p>
             </div>
           </div>
@@ -31,11 +31,11 @@ export function ContactInfo() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Phone</h3>
               <p className="text-muted-foreground">
-                Customer Service: (800) 123-4567
+                Customer Service: +91 1800 123 4567
                 <br />
-                Sales Inquiries: (800) 765-4321
+                Sales Inquiries: +91 1800 765 4321
                 <br />
-                Support: (800) 987-6543
+                Support: +91 1800 987 6543
               </p>
             </div>
           </div>
@@ -49,11 +49,11 @@ export function ContactInfo() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Email</h3>
               <p className="text-muted-foreground">
-                Customer Service: support@nextshop.com
+                Customer Service: support@eshop.in
                 <br />
-                Sales Inquiries: sales@nextshop.com
+                Sales Inquiries: sales@eshop.in
                 <br />
-                General Information: info@nextshop.com
+                General Information: info@eshop.in
               </p>
             </div>
           </div>
@@ -65,11 +65,11 @@ export function ContactInfo() {
         <div className="space-y-2">
           <div className="flex justify-between">
             <span>Monday - Friday:</span>
-            <span>9:00 AM - 6:00 PM</span>
+            <span>10:00 AM - 7:00 PM IST</span>
           </div>
           <div className="flex justify-between">
             <span>Saturday:</span>
-            <span>10:00 AM - 4:00 PM</span>
+            <span>10:00 AM - 5:00 PM IST</span>
           </div>
           <div className="flex justify-between">
             <span>Sunday:</span>

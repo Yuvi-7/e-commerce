@@ -44,7 +44,7 @@ export function AdminSidebar() {
       <div className="flex h-14 items-center border-b px-4">
         <Link href="/admin" className="flex items-center gap-2 font-semibold">
           <Package className="h-6 w-6" />
-          <span>NextShop Admin</span>
+          <span>eShop Admin</span>
         </Link>
       </div>
       <div className="flex-1 overflow-auto py-2">

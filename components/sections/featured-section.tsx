@@ -16,7 +16,7 @@ export function FeaturedSection() {
       id: "1",
       name: "Premium Wireless Headphones",
       price: 199.99,
-      image: "/placeholder.svg?height=200&width=200",
+      image: "/images/products/wireless-headphones.jpg",
       badge: "New",
       category: "Electronics",
       categoryId: "1",
@@ -25,7 +25,7 @@ export function FeaturedSection() {
       id: "2",
       name: "Smart Fitness Tracker",
       price: 89.99,
-      image: "/placeholder.svg?height=200&width=200",
+      image: "/images/products/fitness-tracker.jpg",
       badge: "Sale",
       category: "Electronics",
       categoryId: "1",
@@ -34,7 +34,7 @@ export function FeaturedSection() {
       id: "3",
       name: "Ergonomic Office Chair",
       price: 249.99,
-      image: "/placeholder.svg?height=200&width=200",
+      image: "/images/products/office-chair.jpg",
       category: "Furniture",
       categoryId: "5",
     },
@@ -42,7 +42,7 @@ export function FeaturedSection() {
       id: "4",
       name: "Ultra HD Smart TV",
       price: 699.99,
-      image: "/placeholder.svg?height=200&width=200",
+      image: "/images/products/smart-tv.jpg",
       badge: "Popular",
       category: "Electronics",
       categoryId: "1",
@@ -65,48 +65,48 @@ export function FeaturedSection() {
   }
 
   return (
-    <section className="w-full py-12 md:py-24">
-      <div className="container px-4 md:px-6">
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Featured Products</h2>
-            <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed">
+    <section className="w-full py-16 md:py-24 lg:py-32">
+      <div className="container">
+        <div className="flex flex-col items-center justify-center space-y-6 text-center">
+          <div className="space-y-4">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Featured Products</h2>
+            <p className="max-w-[700px] text-lg text-muted-foreground md:text-xl/relaxed lg:text-2xl/relaxed">
               Check out our most popular items handpicked for you
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
           {featuredProducts.map((product) => (
-            <Card key={product.id} className="overflow-hidden transition-all hover:shadow-lg">
-              <div className="relative">
-                {product.badge && <Badge className="absolute top-2 right-2 z-10">{product.badge}</Badge>}
+            <Card key={product.id} className="overflow-hidden transition-all hover:shadow-lg group">
+              <div className="relative aspect-square">
+                {product.badge && <Badge className="absolute top-3 right-3 z-10">{product.badge}</Badge>}
                 <Link href={`/products/${product.id}`}>
                   <img
                     src={product.image || "/placeholder.svg"}
                     alt={product.name}
                     width={400}
                     height={400}
-                    className="h-[200px] w-full object-cover transition-transform group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 </Link>
               </div>
-              <CardContent className="p-4">
+              <CardContent className="p-6">
                 <Link href={`/products/${product.id}`}>
-                  <h3 className="font-semibold text-lg group-hover:underline">{product.name}</h3>
+                  <h3 className="font-semibold text-lg group-hover:underline mb-2">{product.name}</h3>
                 </Link>
-                <p className="font-medium text-primary">${product.price.toFixed(2)}</p>
+                <p className="font-medium text-primary text-lg">${product.price.toFixed(2)}</p>
               </CardContent>
-              <CardFooter className="p-4 pt-0">
-                <Button className="w-full" onClick={() => handleAddToCart(product)}>
+              <CardFooter className="p-6 pt-0">
+                <Button className="w-full" size="lg" onClick={() => handleAddToCart(product)}>
                   Add to Cart
                 </Button>
               </CardFooter>
             </Card>
           ))}
         </div>
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-16">
           <Link href="/products">
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" className="px-8 text-lg">
               View All Products
             </Button>
           </Link>

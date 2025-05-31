@@ -64,7 +64,7 @@ export default function RegisterPage() {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  placeholder="John Doe"
+                  placeholder="Rajesh Kumar"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -75,7 +75,7 @@ export default function RegisterPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder="rajesh.kumar@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

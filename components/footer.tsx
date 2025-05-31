@@ -4,18 +4,18 @@ import { Facebook, Instagram, Twitter } from "lucide-react"
 export function Footer() {
   return (
     <footer className="border-t bg-background">
-      <div className="container py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">NextShop</h3>
+      <div className="container py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">eShop</h3>
             <p className="text-sm text-muted-foreground">
               Your one-stop shop for all your needs. Quality products at affordable prices.
             </p>
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Shop</h3>
-            <ul className="space-y-2 text-sm">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Shop</h3>
+            <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/products" className="text-muted-foreground hover:text-foreground">
                   All Products
@@ -39,9 +39,9 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Company</h3>
-            <ul className="space-y-2 text-sm">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Company</h3>
+            <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/about" className="text-muted-foreground hover:text-foreground">
                   About Us
@@ -70,25 +70,27 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Connect</h3>
-            <div className="flex space-x-4">
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <Facebook className="h-5 w-5" />
-                <span className="sr-only">Facebook</span>
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <Instagram className="h-5 w-5" />
-                <span className="sr-only">Instagram</span>
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
-              </Link>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Connect</h3>
+              <div className="flex space-x-6">
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
+                  <Facebook className="h-5 w-5" />
+                  <span className="sr-only">Facebook</span>
+                </Link>
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
+                  <Instagram className="h-5 w-5" />
+                  <span className="sr-only">Instagram</span>
+                </Link>
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
+                  <Twitter className="h-5 w-5" />
+                  <span className="sr-only">Twitter</span>
+                </Link>
+              </div>
             </div>
-            <div className="mt-4">
-              <h4 className="text-sm font-medium mb-2">Subscribe to our newsletter</h4>
-              <form className="flex gap-2">
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Subscribe to our newsletter</h4>
+              <form className="flex gap-3">
                 <input
                   type="email"
                   placeholder="Enter your email"
@@ -101,8 +103,8 @@ export function Footer() {
             </div>
           </div>
         </div>
-        <div className="mt-10 border-t pt-6 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} NextShop. All rights reserved.</p>
+        <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} eShop. All rights reserved.</p>
         </div>
       </div>
     </footer>

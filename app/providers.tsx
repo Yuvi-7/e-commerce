@@ -13,12 +13,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <AuthProvider> */}
+      <AuthProvider>
         {/* <CartProvider> */}
           {children}
           <Toaster position="top-right" />
         {/* </CartProvider> */}
-      {/* </AuthProvider> */}
+      </AuthProvider>
     </QueryClientProvider>
   )
 }

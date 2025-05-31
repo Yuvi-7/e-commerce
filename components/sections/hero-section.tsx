@@ -3,24 +3,24 @@ import { Button } from "@/components/ui/button"
 
 export function HeroSection() {
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
-      <div className="container px-4 md:px-6">
-        <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+    <section className="w-full py-16 md:py-24 lg:py-32 xl:py-40 bg-muted">
+      <div className="container">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-16 xl:grid-cols-2 items-center">
+          <div className="flex flex-col justify-center space-y-6">
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                 Discover Our Latest Collection
               </h1>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl">
+              <p className="max-w-[600px] text-muted-foreground text-lg md:text-xl leading-relaxed">
                 Shop the latest trends and find your perfect style. Quality products at affordable prices.
               </p>
             </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row">
+            <div className="flex flex-col gap-4 min-[400px]:flex-row">
               <Link href="/products">
-                <Button size="lg">Shop Now</Button>
+                <Button size="lg" className="px-8">Shop Now</Button>
               </Link>
               <Link href="/categories">
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" className="px-8">
                   Browse Categories
                 </Button>
               </Link>
@@ -28,11 +28,11 @@ export function HeroSection() {
           </div>
           <div className="flex items-center justify-center">
             <img
-              alt="Hero Image"
-              className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
-              height="550"
-              src="/placeholder.svg?height=550&width=550"
-              width="550"
+              alt="Modern Indian Shopping Experience"
+              className="mx-auto aspect-square overflow-hidden rounded-2xl object-cover shadow-lg sm:w-full lg:order-last"
+              height="600"
+              src="/images/about/hero-shopping.jpg"
+              width="600"
             />
           </div>
         </div>

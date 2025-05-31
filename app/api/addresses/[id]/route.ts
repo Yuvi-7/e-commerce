@@ -6,15 +6,18 @@ import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
+type RouteContext = {
+  params: { id: string }
+}
+
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { params } = context;
+  context: RouteContext
+): Promise<NextResponse> {
+  const { id } = context.params
 
   try {
     const { db } = await connectToDatabase()
-
     const token = cookies().get("auth-token")?.value
 
     if (!token) {
@@ -33,7 +36,7 @@ export async function DELETE(
     }
 
     const result = await db.collection("addresses").deleteOne({
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(id),
       userId: decoded.id,
     })
 
@@ -50,13 +53,12 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
-) {
-  const { params } = context;
+  context: RouteContext
+): Promise<NextResponse> {
+  const { id } = context.params
 
   try {
     const { db } = await connectToDatabase()
-
     const token = cookies().get("auth-token")?.value
 
     if (!token) {
@@ -84,7 +86,7 @@ export async function PATCH(
     }
 
     const result = await db.collection("addresses").updateOne(
-      { _id: new ObjectId(params.id), userId: decoded.id },
+      { _id: new ObjectId(id), userId: decoded.id },
       { $set: updates }
     )
 

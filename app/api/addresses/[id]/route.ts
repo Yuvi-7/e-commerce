@@ -6,7 +6,10 @@ import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     const { db } = await connectToDatabase()
     
@@ -30,7 +33,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     const result = await db.collection("addresses").deleteOne({
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(context.params.id),
       userId: decoded.id,
     })
 

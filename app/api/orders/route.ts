@@ -9,7 +9,7 @@ const dummyOrders = [
     email: "john.doe@example.com",
     date: "2023-06-15",
     status: "Delivered",
-    total: "$125.99",
+    total: "₹125.99",
     items: [
       { id: "1", name: "Premium Wireless Headphones", price: 199.99, quantity: 1 },
       { id: "5", name: "Stainless Steel Water Bottle", price: 24.99, quantity: 1 },
@@ -21,7 +21,7 @@ const dummyOrders = [
     email: "jane.smith@example.com",
     date: "2023-06-14",
     status: "Processing",
-    total: "$89.50",
+    total: "₹89.50",
     items: [{ id: "2", name: "Smart Fitness Tracker", price: 89.99, quantity: 1 }],
   },
 ]

@@ -8,8 +8,24 @@ import { Eye, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface Order {
+  _id?: string;
+  id?: string;
+  date: string;
+  items: OrderItem[];
+  total: number;
+  status: "Delivered" | "Processing" | "Shipped" | "Pending" | "Cancelled";
+}
+
 export function OrderHistory() {
-  const [orders, setOrders] = useState([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -29,7 +45,7 @@ export function OrderHistory() {
     }
   }
 
-  const handleDeleteOrder = async (orderId) => {
+  const handleDeleteOrder = async (orderId: string) => {
     try {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: "DELETE",
@@ -40,7 +56,10 @@ export function OrderHistory() {
       }
 
       // Remove the order from the UI
-      setOrders(orders.filter((order) => order.id !== orderId))
+      setOrders(orders.filter((order) => {
+        const orderIdToCompare = order.id || order._id
+        return orderIdToCompare !== undefined && orderIdToCompare !== orderId
+      }))
       toast.success("Order deleted successfully")
     } catch (error) {
       console.error("Failed to delete order:", error)
@@ -48,7 +67,7 @@ export function OrderHistory() {
     }
   }
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: Order["status"]) => {
     switch (status) {
       case "Delivered":
         return "bg-green-500"
@@ -90,40 +109,43 @@ export function OrderHistory() {
 
   return (
     <div className="space-y-6">
-      {orders.map((order) => (
-        <Card key={order.id || order._id}>
-          <CardHeader className="pb-3">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <CardTitle className="text-lg">Order {order.id || order._id}</CardTitle>
-              <div className="flex items-center gap-2 mt-2 md:mt-0">
-                <Badge variant="outline" className={getStatusColor(order.status)}>
-                  {order.status}
-                </Badge>
-                <span className="text-sm text-muted-foreground">{order.date}</span>
+      {orders.map((order) => {
+        const orderId = order.id || order._id
+        if (!orderId) return null
+        return (
+          <Card key={orderId}>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <CardTitle className="text-lg">Order {orderId}</CardTitle>
+                <div className="flex items-center gap-2 mt-2 md:mt-0">
+                  <Badge variant="outline" className={getStatusColor(order.status)}>
+                    {order.status}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">{order.date}</span>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">{order.items?.length || 0} items</p>
-                <p className="font-medium">{order.total}</p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">{order.items?.length || 0} items</p>
+                  <p className="font-medium">${order.total.toFixed(2)}</p>
+                </div>
+                <div className="mt-4 md:mt-0 flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDeleteOrder(orderId)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
+                </div>
               </div>
-              <div className="mt-4 md:mt-0 flex gap-2">
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleDeleteOrder(order.id || order._id)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }

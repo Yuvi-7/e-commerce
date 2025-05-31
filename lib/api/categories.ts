@@ -1,6 +1,13 @@
 import { connectToDatabase } from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import { getCategoryById, getDummyCategories } from "@/lib/data/categories";
+
+type Category = {
+  id: string;
+  name: string;
+  image: string;
+  count: number;
+}
 
 export async function getCategories() {
   try {
@@ -22,7 +29,7 @@ export async function getCategories() {
         });
         return {
           ...category,
-          _id: category._id.toString(),
+          _id: (category as WithId<Category>)._id?.toString() || category.id,
           count, // Add real product count
         };
       })
@@ -60,7 +67,7 @@ export async function getCategoryByIdFromDb(id: string) {
 
         return {
           ...category,
-          _id: category._id.toString(),
+          _id: (category as WithId<Category>)._id?.toString() || category.id,
           count, // Add real product count
         };
       }
@@ -76,7 +83,7 @@ export async function getCategoryByIdFromDb(id: string) {
 
         return {
           ...category,
-          _id: category._id.toString(),
+          _id: (category as WithId<Category>)._id?.toString() || category.id,
           count, // Add real product count
         };
       }

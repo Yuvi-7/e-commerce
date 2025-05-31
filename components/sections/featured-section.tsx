@@ -7,11 +7,21 @@ import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/hooks/use-cart"
 import { toast } from "sonner"
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  badge?: string;
+  category: string;
+  categoryId: string;
+}
+
 export function FeaturedSection() {
-  const { addItem } = useCart()
+  const cart = useCart()
 
   // This would normally come from an API
-  const featuredProducts = [
+  const featuredProducts: Product[] = [
     {
       id: "1",
       name: "Premium Wireless Headphones",
@@ -49,7 +59,12 @@ export function FeaturedSection() {
     },
   ]
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product: Product) => {
+    if (!cart) {
+      toast.error("Cart is not available");
+      return;
+    }
+
     const itemToAdd = {
       id: product.id,
       name: product.name,
@@ -60,7 +75,7 @@ export function FeaturedSection() {
       categoryId: product.categoryId,
     }
 
-    addItem(itemToAdd)
+    cart.addItem(itemToAdd)
     toast.success(`${product.name} added to cart`)
   }
 

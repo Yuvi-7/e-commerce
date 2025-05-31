@@ -8,9 +8,10 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { db } = await connectToDatabase()
     
     // Get token from cookies
@@ -34,7 +35,7 @@ export async function DELETE(
     }
 
     const result = await db.collection("addresses").deleteOne({
-      _id: new ObjectId(context.params.id),
+      _id: new ObjectId(id),
       userId: decoded.id,
     })
 
@@ -51,9 +52,10 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { db } = await connectToDatabase()
     
     // Get token from cookies
@@ -87,7 +89,7 @@ export async function PATCH(
     }
 
     const result = await db.collection("addresses").updateOne(
-      { _id: new ObjectId(context.params.id), userId: decoded.id },
+      { _id: new ObjectId(id), userId: decoded.id },
       { $set: updates }
     )
 

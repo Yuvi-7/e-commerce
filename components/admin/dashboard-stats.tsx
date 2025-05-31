@@ -8,7 +8,7 @@ export function DashboardStats() {
   const stats = [
     {
       title: "Total Revenue",
-      value: "$45,231.89",
+      value: "₹45,231.89",
       description: "+20.1% from last month",
       icon: DollarSign,
     },

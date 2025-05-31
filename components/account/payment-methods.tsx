@@ -6,9 +6,19 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Edit, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
+interface PaymentMethod {
+  id: string;
+  type: string;
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  isDefault: boolean;
+}
+
 export function PaymentMethods() {
   // Dummy payment methods data
-  const [paymentMethods, setPaymentMethods] = useState([
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
     {
       id: "1",
       type: "Credit Card",
@@ -29,12 +39,12 @@ export function PaymentMethods() {
     },
   ])
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: string) => {
     setPaymentMethods(paymentMethods.filter((method) => method.id !== id))
     toast.success("Payment method deleted successfully")
   }
 
-  const handleSetDefault = (id) => {
+  const handleSetDefault = (id: string) => {
     setPaymentMethods(
       paymentMethods.map((method) => ({
         ...method,

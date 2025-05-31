@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-// import { getDummyCategories } from "@/lib/data/categories";
 import { getCategories } from "@/lib/api/categories";
+import { StaticImageData } from "next/image";
 
 // Import category images
 import electronicsImg from "@/public/images/categories/electronics.jpg";
@@ -15,7 +15,7 @@ import booksImg from "@/public/images/categories/books.jpg";
 import toysImg from "@/public/images/categories/toys.jpg";
 
 // Map category IDs to their respective images
-const categoryImages = {
+const categoryImages: Record<string, StaticImageData> = {
   "1": electronicsImg,
   "2": clothingImg,
   "3": homeKitchenImg,
@@ -26,10 +26,16 @@ const categoryImages = {
   "8": toysImg,
 };
 
-export async function CategoryGrid() {
-  const categories = await getCategories();
+interface Category {
+  _id?: string;
+  id: string;
+  name: string;
+  image?: string;
+  count: number;
+}
 
-  // const categories = getDummyCategories();
+export async function CategoryGrid() {
+  const categories = await getCategories() as Category[];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

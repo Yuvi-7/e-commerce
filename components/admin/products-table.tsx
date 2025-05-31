@@ -15,10 +15,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Edit, MoreHorizontal, Search, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { formatCurrency } from "@/lib/utils"
+
+type ProductStatus = "In Stock" | "Low Stock" | "Out of Stock"
+
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  status: ProductStatus;
+}
 
 export function ProductsTable() {
   // This would normally come from an API using TanStack Query
-  const [products, setProducts] = useState([
+  const [products, setProducts] = useState<Product[]>([
     {
       id: "1",
       name: "Premium Wireless Headphones",
@@ -85,7 +97,7 @@ export function ProductsTable() {
     },
   ])
 
-  const handleDeleteProduct = (id) => {
+  const handleDeleteProduct = (id: string) => {
     setProducts(products.filter((product) => product.id !== id))
     toast.success("Product deleted successfully")
   }
@@ -115,7 +127,7 @@ export function ProductsTable() {
               <TableRow key={product.id}>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>{product.category}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
+                <TableCell>₹{product.price.toFixed(2)}</TableCell>
                 <TableCell>{product.stock}</TableCell>
                 <TableCell>
                   <Badge

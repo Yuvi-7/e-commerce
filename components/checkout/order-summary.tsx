@@ -7,7 +7,13 @@ import { useCart } from "@/hooks/use-cart"
 import Link from "next/link"
 
 export function OrderSummary() {
-  const { items, subtotal, shipping, tax, total } = useCart()
+  const cart = useCart()
+
+  if (!cart) {
+    return null
+  }
+
+  const { items, subtotal, shipping, tax, total } = cart
 
   if (items.length === 0) {
     return (

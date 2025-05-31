@@ -4,47 +4,57 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 
+type OrderStatus = "Delivered" | "Processing" | "Shipped" | "Pending"
+
+interface Order {
+  id: string;
+  customer: string;
+  date: string;
+  status: OrderStatus;
+  total: string;
+}
+
 export function RecentOrders() {
   // This would normally come from an API
-  const orders = [
+  const orders: Order[] = [
     {
       id: "ORD-001",
       customer: "John Doe",
       date: "2023-06-15",
       status: "Delivered",
-      total: "$125.99",
+      total: "₹125.99",
     },
     {
       id: "ORD-002",
       customer: "Jane Smith",
       date: "2023-06-14",
       status: "Processing",
-      total: "$89.50",
+      total: "₹89.50",
     },
     {
       id: "ORD-003",
       customer: "Robert Johnson",
       date: "2023-06-14",
       status: "Shipped",
-      total: "$254.75",
+      total: "₹254.75",
     },
     {
       id: "ORD-004",
       customer: "Emily Davis",
       date: "2023-06-13",
       status: "Pending",
-      total: "$45.25",
+      total: "₹45.25",
     },
     {
       id: "ORD-005",
       customer: "Michael Wilson",
       date: "2023-06-12",
       status: "Delivered",
-      total: "$189.99",
+      total: "₹189.99",
     },
   ]
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case "Delivered":
         return "bg-green-500"

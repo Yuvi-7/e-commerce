@@ -4,8 +4,9 @@ import { ProductFilters } from "@/components/product/product-filters"
 import { getCategoryById } from "@/lib/data/categories"
 import { notFound } from "next/navigation"
 
-export default function CategoryPage({ params }: { params: { id: string } }) {
-  const category = getCategoryById(params.id)
+export default async function CategoryPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const category = getCategoryById(id)
 
   if (!category) {
     notFound()
@@ -20,7 +21,7 @@ export default function CategoryPage({ params }: { params: { id: string } }) {
             <ProductFilters />
           </div>
           <div className="md:col-span-3">
-            <ProductGrid categoryId={params.id} />
+            <ProductGrid categoryId={id} />
           </div>
         </div>
       </div>

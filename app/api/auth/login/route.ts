@@ -3,8 +3,17 @@ import { type NextRequest, NextResponse } from "next/server"
 import { compare } from "bcrypt"
 import { cookies } from "next/headers"
 import { sign } from "jsonwebtoken"
+import { WithId } from "mongodb"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
-    const user = await db.collection("users").findOne({ email })
+    const user = await db.collection("users").findOne({ email }) as WithId<User>
     if (!user) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
     }
@@ -40,7 +49,8 @@ export async function POST(request: NextRequest) {
     const token = sign({ id: user._id.toString(), email: user.email, role: user.role }, JWT_SECRET, { expiresIn: "7d" })
 
     // Set cookie
-    cookies().set({
+    const cookieStore = await cookies()
+    cookieStore.set({
       name: "auth-token",
       value: token,
       httpOnly: true,

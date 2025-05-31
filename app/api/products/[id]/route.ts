@@ -3,13 +3,17 @@ import { type NextRequest, NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
 import { getDummyProductById } from "@/lib/data/products"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const { db } = await connectToDatabase()
 
     if (!db) {
       // If no database connection, return dummy data
-      const product = getDummyProductById(params.id)
+      const product = getDummyProductById(id)
       if (!product) {
         return NextResponse.json({ error: "Product not found" }, { status: 404 })
       }
@@ -19,14 +23,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // With database connection, query MongoDB
     let objectId
     try {
-      objectId = new ObjectId(params.id)
+      objectId = new ObjectId(id)
     } catch (error) {
       // If ID is not a valid ObjectId, try to find by string ID
-      const product = await db.collection("products").findOne({ id: params.id })
+      const product = await db.collection("products").findOne({ id: id })
       if (product) return NextResponse.json(product)
 
       // If not found, try dummy data
-      const dummyProduct = getDummyProductById(params.id)
+      const dummyProduct = getDummyProductById(id)
       if (dummyProduct) return NextResponse.json(dummyProduct)
 
       return NextResponse.json({ error: "Product not found" }, { status: 404 })
@@ -38,7 +42,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     if (!product) {
       // If not found in database, try dummy data
-      const dummyProduct = getDummyProductById(params.id)
+      const dummyProduct = getDummyProductById(id)
       if (dummyProduct) return NextResponse.json(dummyProduct)
 
       return NextResponse.json({ error: "Product not found" }, { status: 404 })
@@ -49,15 +53,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     console.error("Failed to fetch product:", error)
 
     // Fall back to dummy data on error
-    const dummyProduct = getDummyProductById(params.id)
+    const { id } = await params
+    const dummyProduct = getDummyProductById(id)
     if (dummyProduct) return NextResponse.json(dummyProduct)
 
     return NextResponse.json({ error: "Product not found" }, { status: 404 })
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const { db } = await connectToDatabase()
     const updates = await request.json()
 
@@ -69,10 +78,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // With database connection, update in MongoDB
     let objectId
     try {
-      objectId = new ObjectId(params.id)
+      objectId = new ObjectId(id)
     } catch (error) {
       // If ID is not a valid ObjectId, try to update by string ID
-      const result = await db.collection("products").updateOne({ id: params.id }, { $set: updates })
+      const result = await db.collection("products").updateOne({ id: id }, { $set: updates })
       if (result.matchedCount === 0) {
         return NextResponse.json({ error: "Product not found" }, { status: 404 })
       }
@@ -92,8 +101,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const { db } = await connectToDatabase()
 
     if (!db) {
@@ -104,10 +117,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     // With database connection, delete from MongoDB
     let objectId
     try {
-      objectId = new ObjectId(params.id)
+      objectId = new ObjectId(id)
     } catch (error) {
       // If ID is not a valid ObjectId, try to delete by string ID
-      const result = await db.collection("products").deleteOne({ id: params.id })
+      const result = await db.collection("products").deleteOne({ id: id })
       if (result.deletedCount === 0) {
         return NextResponse.json({ error: "Product not found" }, { status: 404 })
       }

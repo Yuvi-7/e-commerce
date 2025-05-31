@@ -5,9 +5,16 @@ import { useCart } from "@/hooks/use-cart"
 import { Minus, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
+import { formatCurrency } from "@/lib/utils"
 
 export function CartItems() {
-  const { items, removeItem, updateItemQuantity } = useCart()
+  const cart = useCart()
+
+  if (!cart) {
+    return null
+  }
+
+  const { items, removeItem, updateItemQuantity } = cart
 
   if (items.length === 0) {
     return (
@@ -40,7 +47,9 @@ export function CartItems() {
             </Link>
             {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>}
             {item.color && <p className="text-sm text-muted-foreground">Color: {item.color}</p>}
-            <p className="text-sm text-muted-foreground">Price: ${item.price.toFixed(2)}</p>
+            <p className="text-sm text-muted-foreground">
+              Price: ₹{item.price.toFixed(2)}
+            </p>
             <div className="flex items-center gap-2 mt-2">
               <Button
                 variant="outline"
@@ -77,7 +86,7 @@ export function CartItems() {
             </div>
           </div>
           <div className="text-right">
-            <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+            <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
           </div>
         </div>
       ))}

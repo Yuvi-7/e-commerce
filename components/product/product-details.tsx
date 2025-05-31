@@ -30,6 +30,7 @@ import { useCart } from "@/hooks/use-cart"
 import { toast } from "sonner"
 import { Heart, Share2, Star, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { formatCurrency } from "@/lib/utils"
 
 // Constants
 const MIN_QUANTITY = 1;
@@ -68,7 +69,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const [imageError, setImageError] = useState(false)
   
   // Hooks
-  const { addItem } = useCart()
+  const cart = useCart()
   const router = useRouter()
 
   // Memoized product details to prevent unnecessary re-renders
@@ -97,6 +98,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
   const handleAddToCart = useCallback(() => {
     try {
+      if (!cart) {
+        toast.error("Cart is not available");
+        return;
+      }
+
       if (!selectedSize && productDetails.sizes.length > 1) {
         toast.error("Please select a size");
         return;
@@ -119,13 +125,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         categoryId: productDetails.categoryId,
       };
 
-      addItem(itemToAdd);
+      cart.addItem(itemToAdd);
       toast.success(`${productDetails.name} added to cart`);
     } catch (error) {
       console.error("Failed to add item to cart:", error);
       toast.error("Failed to add item to cart. Please try again.");
     }
-  }, [productDetails, quantity, selectedSize, selectedColor, addItem]);
+  }, [productDetails, quantity, selectedSize, selectedColor, cart]);
 
   const handleBuyNow = useCallback(() => {
     handleAddToCart();
@@ -171,9 +177,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                   <Star key={i} className={`h-5 w-5 ${i < 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} />
                 ))}
               </div>
-              <span className="text-sm text-muted-foreground">4.0 (24 reviews)</span>
+              <span className="ml-2 text-sm text-muted-foreground">(4.0)</span>
             </div>
-            <p className="text-3xl font-bold text-primary">${productDetails.price.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-primary">₹{productDetails.price.toFixed(2)}</p>
           </div>
 
           <p className="text-muted-foreground text-lg leading-relaxed">{productDetails.description}</p>
@@ -250,49 +256,70 @@ export function ProductDetails({ product }: ProductDetailsProps) {
           <TabsTrigger value="specifications">Specifications</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
         </TabsList>
-        <TabsContent value="features" className="p-6 border rounded-lg">
-          <ul className="list-disc pl-6 space-y-3 text-lg">
-            {productDetails.features.map((feature, index) => (
-              <li key={index}>{feature}</li>
-            ))}
-          </ul>
-        </TabsContent>
-        <TabsContent value="specifications" className="p-6 border rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(productDetails.specifications).map(([key, value]) => (
-              <div key={key} className="flex justify-between border-b pb-3">
-                <span className="font-medium text-lg">{key}</span>
-                <span className="text-lg">{value}</span>
+        <TabsContent value="features">
+          <div className="space-y-4">
+            {productDetails.features.length > 0 ? (
+              <ul className="list-disc list-inside space-y-2">
+                {productDetails.features.map((feature, index) => (
+                  <li key={index}>{feature}</li>
+                ))}
+              </ul>
+            ) : (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertCircle className="h-5 w-5" />
+                <p>No features available</p>
               </div>
-            ))}
+            )}
           </div>
         </TabsContent>
-        <TabsContent value="reviews" className="p-6 border rounded-lg">
-          <div className="space-y-6">
-            {productDetails.reviews.map((review) => (
-              <div key={review.id} className="border-b pb-4">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="font-medium">{review.user}</p>
-                    <div className="flex mt-1">
+        <TabsContent value="specifications">
+          <div className="space-y-4">
+            {Object.keys(productDetails.specifications).length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(productDetails.specifications).map(([key, value]) => (
+                  <div key={key} className="flex justify-between border-b pb-2">
+                    <span className="font-medium">{key}</span>
+                    <span>{value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertCircle className="h-5 w-5" />
+                <p>No specifications available</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="reviews">
+          <div className="space-y-8">
+            {productDetails.reviews.length > 0 ? (
+              productDetails.reviews.map((review) => (
+                <div key={review.id} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-4 w-4 ${
-                            i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
-                          }`}
+                          className={`h-4 w-4 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
                         />
                       ))}
                     </div>
+                    <span className="text-sm font-medium">{review.user}</span>
+                    <span className="text-sm text-muted-foreground">{review.date}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{review.date}</p>
+                  <p className="text-muted-foreground">{review.comment}</p>
                 </div>
-                <p className="mt-2">{review.comment}</p>
+              ))
+            ) : (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertCircle className="h-5 w-5" />
+                <p>No reviews yet</p>
               </div>
-            ))}
+            )}
           </div>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

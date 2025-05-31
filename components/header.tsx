@@ -29,8 +29,10 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   
   const pathname = usePathname();
-  const { totalItems = 0 } = useCart();
+  const cart = useCart();
   const { user, logout } = useAuth();
+
+  const totalItems = cart?.totalItems || 0;
 
   useEffect(() => {
     setMounted(true);

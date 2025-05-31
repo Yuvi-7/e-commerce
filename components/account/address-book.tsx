@@ -8,8 +8,21 @@ import { toast } from "sonner"
 import { AddressFormDialog } from "./address-form-dialog"
 import Link from "next/link"
 
+interface Address {
+  _id: string;
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+  isDefault: boolean;
+}
+
 export function AddressBook() {
-  const [addresses, setAddresses] = useState([])
+  const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -30,7 +43,7 @@ export function AddressBook() {
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/addresses/${id}`, {
         method: "DELETE",
@@ -44,7 +57,7 @@ export function AddressBook() {
     }
   }
 
-  const handleSetDefault = async (id) => {
+  const handleSetDefault = async (id: string) => {
     try {
       const response = await fetch(`/api/addresses/${id}`, {
         method: "PATCH",
@@ -104,7 +117,6 @@ export function AddressBook() {
             </CardContent>
             <CardFooter className="flex justify-between">
               <div className="flex space-x-2">
-                */}
                 <Button variant="outline" size="sm" onClick={() => handleDelete(address._id)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete

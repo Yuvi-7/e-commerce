@@ -15,16 +15,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Eye, MoreHorizontal, Search } from "lucide-react"
 
+type OrderStatus = "Delivered" | "Processing" | "Shipped" | "Pending" | "Cancelled" | "Refunded"
+
+interface Order {
+  id: string;
+  customer: string;
+  email: string;
+  date: string;
+  status: OrderStatus;
+  total: string;
+}
+
 export function OrdersTable() {
   // This would normally come from an API using TanStack Query
-  const [orders] = useState([
+  const [orders] = useState<Order[]>([
     {
       id: "ORD-001",
       customer: "Alice Johnson",
       email: "alice.johnson@example.com",
       date: "2023-06-15",
       status: "Delivered",
-      total: "$125.99",
+      total: "₹125.99",
     },
     {
       id: "ORD-002",
@@ -32,7 +43,7 @@ export function OrdersTable() {
       email: "jane.smith@example.com",
       date: "2023-06-14",
       status: "Processing",
-      total: "$89.50",
+      total: "₹89.50",
     },
     {
       id: "ORD-003",
@@ -40,7 +51,7 @@ export function OrdersTable() {
       email: "robert.johnson@example.com",
       date: "2023-06-14",
       status: "Shipped",
-      total: "$254.75",
+      total: "₹254.75",
     },
     {
       id: "ORD-004",
@@ -48,7 +59,7 @@ export function OrdersTable() {
       email: "emily.davis@example.com",
       date: "2023-06-13",
       status: "Pending",
-      total: "$45.25",
+      total: "₹45.25",
     },
     {
       id: "ORD-005",
@@ -56,7 +67,7 @@ export function OrdersTable() {
       email: "michael.wilson@example.com",
       date: "2023-06-12",
       status: "Delivered",
-      total: "$189.99",
+      total: "₹189.99",
     },
     {
       id: "ORD-006",
@@ -64,7 +75,7 @@ export function OrdersTable() {
       email: "sarah.brown@example.com",
       date: "2023-06-11",
       status: "Cancelled",
-      total: "$67.50",
+      total: "₹67.50",
     },
     {
       id: "ORD-007",
@@ -72,7 +83,7 @@ export function OrdersTable() {
       email: "david.miller@example.com",
       date: "2023-06-10",
       status: "Delivered",
-      total: "$124.00",
+      total: "₹124.00",
     },
     {
       id: "ORD-008",
@@ -80,11 +91,11 @@ export function OrdersTable() {
       email: "jennifer.taylor@example.com",
       date: "2023-06-09",
       status: "Refunded",
-      total: "$99.99",
+      total: "₹99.99",
     },
   ])
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case "Delivered":
         return "bg-green-500"

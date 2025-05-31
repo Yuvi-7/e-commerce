@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, ChangeEvent, FormEvent } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,14 +13,35 @@ import { useCart } from "@/hooks/use-cart"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  cardName: string;
+  cardNumber: string;
+  expiry: string;
+  cvc: string;
+}
+
 export function CheckoutForm() {
   const [paymentMethod, setPaymentMethod] = useState("card")
   const [shippingMethod, setShippingMethod] = useState("standard")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { items, clearCart, subtotal, shipping, tax, total } = useCart()
+  const cart = useCart()
   const router = useRouter()
 
-  const [formData, setFormData] = useState({
+  if (!cart) {
+    return null
+  }
+
+  const { items, clearCart, subtotal, shipping, tax, total } = cart
+
+  const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
     email: "",
@@ -35,12 +56,12 @@ export function CheckoutForm() {
     cvc: "",
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
 
@@ -94,13 +115,13 @@ export function CheckoutForm() {
             expiry: formData.expiry,
           }),
         },
-        shipping: {
+        shippingDetails: {
           method: shippingMethod,
           cost: shippingMethod === "express" ? 25.00 : 10.00,
         },
         status: "Pending",
         subtotal,
-        shipping,
+        shippingCost: shipping,
         tax,
         total,
         date: new Date().toISOString(),
@@ -251,82 +272,79 @@ export function CheckoutForm() {
                 Bank Transfer
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="card" className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="cardName">Name on Card *</Label>
-                <Input
-                  id="cardName"
-                  name="cardName"
-                  value={formData.cardName}
-                  onChange={handleChange}
-                  placeholder="Enter name on card"
-                  required={paymentMethod === "card"}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber">Card Number *</Label>
-                <Input
-                  id="cardNumber"
-                  name="cardNumber"
-                  value={formData.cardNumber}
-                  onChange={handleChange}
-                  placeholder="0000 0000 0000 0000"
-                  required={paymentMethod === "card"}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            <TabsContent value="card">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="expiry">Expiry Date *</Label>
+                  <Label htmlFor="cardName">Name on Card *</Label>
                   <Input
-                    id="expiry"
-                    name="expiry"
-                    value={formData.expiry}
+                    id="cardName"
+                    name="cardName"
+                    value={formData.cardName}
                     onChange={handleChange}
-                    placeholder="MM/YY"
+                    placeholder="Rajesh Kumar"
                     required={paymentMethod === "card"}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cvc">CVC *</Label>
+                  <Label htmlFor="cardNumber">Card Number *</Label>
                   <Input
-                    id="cvc"
-                    name="cvc"
-                    value={formData.cvc}
+                    id="cardNumber"
+                    name="cardNumber"
+                    value={formData.cardNumber}
                     onChange={handleChange}
-                    placeholder="CVC"
+                    placeholder="4242 4242 4242 4242"
                     required={paymentMethod === "card"}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="expiry">Expiry Date *</Label>
+                    <Input
+                      id="expiry"
+                      name="expiry"
+                      value={formData.expiry}
+                      onChange={handleChange}
+                      placeholder="MM/YY"
+                      required={paymentMethod === "card"}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cvc">CVC *</Label>
+                    <Input
+                      id="cvc"
+                      name="cvc"
+                      value={formData.cvc}
+                      onChange={handleChange}
+                      placeholder="123"
+                      required={paymentMethod === "card"}
+                    />
+                  </div>
                 </div>
               </div>
             </TabsContent>
-            <TabsContent value="bank" className="space-y-4 mt-4">
-              <div className="rounded-md bg-muted p-4">
-                <p className="text-sm font-medium">Bank Transfer Details</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Please use the following details to make a bank transfer:
-                </p>
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium">Bank Name:</span>
-                    <span className="text-sm">NextBank</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium">Account Name:</span>
-                    <span className="text-sm">eShop Inc.</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium">Account Number:</span>
-                    <span className="text-sm">1234567890</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium">Routing Number:</span>
-                    <span className="text-sm">987654321</span>
+            <TabsContent value="bank">
+              <div className="space-y-4">
+                <div className="rounded-md bg-muted p-4">
+                  <p className="text-sm font-medium">Bank Account Details</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Please transfer the total amount to the following bank account:
+                  </p>
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm">
+                      <span className="font-medium">Bank Name:</span> State Bank of India
+                    </p>
+                    <p className="text-sm">
+                      <span className="font-medium">Account Name:</span> E-commerce Store
+                    </p>
+                    <p className="text-sm">
+                      <span className="font-medium">Account Number:</span> 1234567890
+                    </p>
+                    <p className="text-sm">
+                      <span className="font-medium">IFSC Code:</span> SBIN0001234
+                    </p>
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Please include your order number in the transfer reference.
-              </p>
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -337,27 +355,43 @@ export function CheckoutForm() {
           <CardTitle>Shipping Method</CardTitle>
         </CardHeader>
         <CardContent>
-          <RadioGroup defaultValue="standard" value={shippingMethod} onValueChange={setShippingMethod}>
-            <div className="flex items-center justify-between space-x-2 border p-4 rounded-md">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="standard" id="standard" />
-                <Label htmlFor="standard" className="font-normal">
-                  Standard Shipping (3-5 business days)
-                </Label>
-              </div>
-              <span>$10.00</span>
+          <RadioGroup value={shippingMethod} onValueChange={setShippingMethod}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="standard" id="standard" />
+              <Label htmlFor="standard">Standard Shipping (₹10.00) - 5-7 business days</Label>
             </div>
-            <Separator className="my-4" />
-            <div className="flex items-center justify-between space-x-2 border p-4 rounded-md">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="express" id="express" />
-                <Label htmlFor="express" className="font-normal">
-                  Express Shipping (1-2 business days)
-                </Label>
-              </div>
-              <span>$25.00</span>
+            <div className="flex items-center space-x-2 mt-2">
+              <RadioGroupItem value="express" id="express" />
+              <Label htmlFor="express">Express Shipping (₹25.00) - 2-3 business days</Label>
             </div>
           </RadioGroup>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Order Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <span>Subtotal ({items.length} items)</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>${shipping.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Tax</span>
+              <span>${tax.toFixed(2)}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between font-medium">
+              <span>Total</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

@@ -1,15 +1,31 @@
-import { MongoClient } from "mongodb"
+import { MongoClient, ObjectId } from "mongodb"
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/eshop"
 const options = {}
 
-let client
+let client: MongoClient
 let clientPromise: Promise<MongoClient>
+
+declare global {
+  var _mongoClientPromise: Promise<MongoClient>
+}
+
+type CollectionName = "products" | "categories" | "users" | "addresses" | "orders" | "cart"
+type Query = {
+  _id?: string | ObjectId
+  id?: string
+  email?: string
+}
+
+type ProjectionType = {
+  projection?: Record<string, number>
+}
+
+type DummyData = Record<string, any>
 
 // This is a wrapper to prevent errors when MongoDB is not connected
 // It will use dummy data instead
 export async function connectToDatabase() {
-
   console.log('called m')
   try {
     if (!process.env.MONGODB_URI) {
@@ -19,7 +35,7 @@ export async function connectToDatabase() {
       return {
         client: null,
         db: {
-          collection: (name) => ({
+          collection: (name: CollectionName) => ({
             find: () => ({
               toArray: async () => {
                 // Return dummy data based on collection name
@@ -44,27 +60,33 @@ export async function connectToDatabase() {
                 },
               }),
             }),
-            findOne: async (query) => {
+            findOne: async (query: Query, options?: ProjectionType) => {
               // Return dummy data based on collection name and query
+              let result: DummyData | null = null;
+              
               if (name === "products") {
                 if (query._id) {
-                  return (await import("./data/products")).getDummyProductById(query._id.toString())
+                  const data = await (await import("./data/products")).getDummyProductById(query._id.toString())
+                  result = data || null
                 }
                 if (query.id) {
-                  return (await import("./data/products")).getDummyProductById(query.id)
+                  const data = await (await import("./data/products")).getDummyProductById(query.id)
+                  result = data || null
                 }
               }
               if (name === "categories") {
                 if (query._id) {
-                  return (await import("./data/categories")).getCategoryById(query._id.toString())
+                  const data = await (await import("./data/categories")).getCategoryById(query._id.toString())
+                  result = data || null
                 }
                 if (query.id) {
-                  return (await import("./data/categories")).getCategoryById(query.id)
+                  const data = await (await import("./data/categories")).getCategoryById(query.id)
+                  result = data || null
                 }
               }
               if (name === "users") {
                 if (query.email === "admin@example.com") {
-                  return {
+                  result = {
                     _id: "1",
                     name: "Admin User",
                     email: "admin@example.com",
@@ -73,7 +95,7 @@ export async function connectToDatabase() {
                   }
                 }
                 if (query.email === "customer@example.com") {
-                  return {
+                  result = {
                     _id: "2",
                     name: "Customer User",
                     email: "customer@example.com",
@@ -82,12 +104,25 @@ export async function connectToDatabase() {
                   }
                 }
               }
-              return null
+
+              // Apply projection if specified
+              if (result && options?.projection) {
+                const filtered: DummyData = {};
+                for (const key in result) {
+                  if (options.projection[key] !== 0) {
+                    filtered[key] = result[key];
+                  }
+                }
+                return filtered;
+              }
+
+              return result;
             },
-            insertOne: async (data) => ({ insertedId: "dummy-id" }),
+            insertOne: async (data: unknown) => ({ insertedId: "dummy-id" }),
             updateOne: async () => ({ matchedCount: 1 }),
             updateMany: async () => ({ matchedCount: 1 }),
             deleteOne: async () => ({ deletedCount: 1 }),
+            countDocuments: async () => 0,
           }),
         },
       }
@@ -119,7 +154,7 @@ export async function connectToDatabase() {
     return {
       client: null,
       db: {
-        collection: (name) => ({
+        collection: (name: CollectionName) => ({
           find: () => ({
             toArray: async () => {
               // Return dummy data based on collection name
@@ -144,27 +179,33 @@ export async function connectToDatabase() {
               },
             }),
           }),
-          findOne: async (query) => {
+          findOne: async (query: Query, options?: ProjectionType) => {
             // Return dummy data based on collection name and query
+            let result: DummyData | null = null;
+              
             if (name === "products") {
               if (query._id) {
-                return (await import("./data/products")).getDummyProductById(query._id.toString())
+                const data = await (await import("./data/products")).getDummyProductById(query._id.toString())
+                result = data || null
               }
               if (query.id) {
-                return (await import("./data/products")).getDummyProductById(query.id)
+                const data = await (await import("./data/products")).getDummyProductById(query.id)
+                result = data || null
               }
             }
             if (name === "categories") {
               if (query._id) {
-                return (await import("./data/categories")).getCategoryById(query._id.toString())
+                const data = await (await import("./data/categories")).getCategoryById(query._id.toString())
+                result = data || null
               }
               if (query.id) {
-                return (await import("./data/categories")).getCategoryById(query.id)
+                const data = await (await import("./data/categories")).getCategoryById(query.id)
+                result = data || null
               }
             }
             if (name === "users") {
               if (query.email === "admin@example.com") {
-                return {
+                result = {
                   _id: "1",
                   name: "Admin User",
                   email: "admin@example.com",
@@ -173,7 +214,7 @@ export async function connectToDatabase() {
                 }
               }
               if (query.email === "customer@example.com") {
-                return {
+                result = {
                   _id: "2",
                   name: "Customer User",
                   email: "customer@example.com",
@@ -182,12 +223,25 @@ export async function connectToDatabase() {
                 }
               }
             }
-            return null
+
+            // Apply projection if specified
+            if (result && options?.projection) {
+              const filtered: DummyData = {};
+              for (const key in result) {
+                if (options.projection[key] !== 0) {
+                  filtered[key] = result[key];
+                }
+              }
+              return filtered;
+            }
+
+            return result;
           },
-          insertOne: async (data) => ({ insertedId: "dummy-id" }),
+          insertOne: async (data: unknown) => ({ insertedId: "dummy-id" }),
           updateOne: async () => ({ matchedCount: 1 }),
           updateMany: async () => ({ matchedCount: 1 }),
           deleteOne: async () => ({ deletedCount: 1 }),
+          countDocuments: async () => 0,
         }),
       },
     }

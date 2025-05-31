@@ -2,8 +2,12 @@ import { connectToDatabase } from "@/lib/mongodb"
 import { type NextRequest, NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const { db } = await connectToDatabase()
 
     if (!db) {
@@ -13,10 +17,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // With database connection, query MongoDB
     let objectId
     try {
-      objectId = new ObjectId(params.id)
+      objectId = new ObjectId(id)
     } catch (error) {
       // If ID is not a valid ObjectId, try to find by string ID
-      const order = await db.collection("orders").findOne({ id: params.id })
+      const order = await db.collection("orders").findOne({ id: id })
       if (order) return NextResponse.json(order)
       return NextResponse.json({ error: "Order not found" }, { status: 404 })
     }
@@ -36,8 +40,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
     const { db } = await connectToDatabase()
 
     if (!db) {
@@ -48,10 +56,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     // With database connection, delete from MongoDB
     let objectId
     try {
-      objectId = new ObjectId(params.id)
+      objectId = new ObjectId(id)
     } catch (error) {
       // If ID is not a valid ObjectId, try to delete by string ID
-      const result = await db.collection("orders").deleteOne({ id: params.id })
+      const result = await db.collection("orders").deleteOne({ id: id })
       if (result.deletedCount === 0) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 })
       }

@@ -9,6 +9,7 @@ import { useCart } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { getDummyProducts } from "@/lib/data/products";
 import { useSearchParams } from "next/navigation";
+import { formatCurrency } from "@/lib/utils";
 
 type Product = {
   id: string;
@@ -116,9 +117,11 @@ export function ProductGrid({ categoryId }: { categoryId?: string }) {
                     {product.name}
                   </h3>
                 </Link>
-                <p className="font-medium text-primary text-lg mb-2">
-                  ${product.price.toFixed(2)}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-primary">
+                    ₹{product.price.toFixed(2)}
+                  </p>
+                </div>
                 {product.category && (
                   <p className="text-sm text-muted-foreground">
                     {product.category}

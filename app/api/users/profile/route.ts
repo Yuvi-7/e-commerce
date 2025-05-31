@@ -1,17 +1,30 @@
 import { connectToDatabase } from "@/lib/mongodb"
 import { type NextRequest, NextResponse } from "next/server"
-import { ObjectId } from "mongodb"
+import { ObjectId, WithId } from "mongodb"
 import { cookies } from "next/headers"
 import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+
+interface JWTPayload {
+  id: string;
+}
+
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}
 
 export async function GET(request: NextRequest) {
   try {
     const { db } = await connectToDatabase()
     
     // Get token from cookies
-    const token = cookies().get("auth-token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -20,7 +33,7 @@ export async function GET(request: NextRequest) {
     // Verify token and get user ID
     let decoded
     try {
-      decoded = verify(token, JWT_SECRET) as { id: string }
+      decoded = verify(token, JWT_SECRET) as JWTPayload
     } catch (error) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
@@ -32,7 +45,7 @@ export async function GET(request: NextRequest) {
     const user = await db.collection("users").findOne(
       { _id: new ObjectId(decoded.id) },
       { projection: { password: 0 } } // Exclude password from the response
-    )
+    ) as WithId<Omit<User, 'password'>>
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -50,7 +63,8 @@ export async function PATCH(request: NextRequest) {
     const { db } = await connectToDatabase()
     
     // Get token from cookies
-    const token = cookies().get("auth-token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -59,7 +73,7 @@ export async function PATCH(request: NextRequest) {
     // Verify token and get user ID
     let decoded
     try {
-      decoded = verify(token, JWT_SECRET) as { id: string }
+      decoded = verify(token, JWT_SECRET) as JWTPayload
     } catch (error) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
@@ -88,7 +102,7 @@ export async function PATCH(request: NextRequest) {
     const updatedUser = await db.collection("users").findOne(
       { _id: new ObjectId(decoded.id) },
       { projection: { password: 0 } }
-    )
+    ) as WithId<Omit<User, 'password'>>
 
     return NextResponse.json(updatedUser)
   } catch (error) {

@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
     const { db } = await connectToDatabase()
     
     // Get token from cookies
-    const token = cookies().get("auth-token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -41,7 +42,8 @@ export async function POST(request: NextRequest) {
     const { db } = await connectToDatabase()
     
     // Get token from cookies
-    const token = cookies().get("auth-token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

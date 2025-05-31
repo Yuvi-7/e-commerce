@@ -1,24 +1,19 @@
 import { connectToDatabase } from "@/lib/mongodb"
 import { NextRequest, NextResponse } from "next/server"
-import { ObjectId } from "mongodb"
+import { ObjectId, Collection } from "mongodb"
 import { cookies } from "next/headers"
 import { verify } from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
-type RouteContext = {
-  params: { id: string }
-}
-
 export async function DELETE(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
-  const { id } = context.params
-
   try {
     const { db } = await connectToDatabase()
-    const token = cookies().get("auth-token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -35,8 +30,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Database not available" }, { status: 503 })
     }
 
-    const result = await db.collection("addresses").deleteOne({
-      _id: new ObjectId(id),
+    const addressesCollection = db.collection("addresses") as Collection
+    const result = await addressesCollection.deleteOne({
+      _id: new ObjectId(params.id),
       userId: decoded.id,
     })
 
@@ -53,13 +49,12 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  context: RouteContext
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
-  const { id } = context.params
-
   try {
     const { db } = await connectToDatabase()
-    const token = cookies().get("auth-token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth-token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -78,15 +73,16 @@ export async function PATCH(
       return NextResponse.json({ error: "Database not available" }, { status: 503 })
     }
 
+    const addressesCollection = db.collection("addresses") as Collection
     if (updates.isDefault) {
-      await db.collection("addresses").updateMany(
+      await addressesCollection.updateMany(
         { userId: decoded.id },
         { $set: { isDefault: false } }
       )
     }
 
-    const result = await db.collection("addresses").updateOne(
-      { _id: new ObjectId(id), userId: decoded.id },
+    const result = await addressesCollection.updateOne(
+      { _id: new ObjectId(params.id), userId: decoded.id },
       { $set: updates }
     )
 
